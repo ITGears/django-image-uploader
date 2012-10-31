@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+
+{% block js %}
+	{{ form.media }}
+	<script type="text/javascript">
+        jQuery(document).ready(function(){
+    		ImageUploader.initCrop(150, 94, '{% url image_uploader:upload %}', '#example-form');
+        });
+	</script>
+{% endblock %}
+
+{% block content %}
+    <h2>Add Pictures</h2>
+	<form action="" method="post" id="example-form" enctype="multipart/form-data" >
+	    {% csrf_token %}
+	    {{ form }}
+	    <button>Add</button>
+	</form>
+	</br>
+	
+	{% load image_uploader %}
+	{% cropping_preview 1 400 250 %}
+	{% cropping_preview 2 150 94 %}
+{% endblock %}

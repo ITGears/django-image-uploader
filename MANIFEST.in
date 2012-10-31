@@ -1,0 +1,3 @@
+recursive-include image_uploader/locale *.po *.mo
+recursive-include image_uploader/static *.css *.js *.gif
+recursive-include image_uploader/templates *.html
