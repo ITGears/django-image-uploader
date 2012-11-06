@@ -2,23 +2,32 @@
 
 {% block js %}
 	{{ form.media }}
-	<script type="text/javascript">
-        jQuery(document).ready(function(){
-    		ImageUploader.initCrop(150, 94, '{% url image_uploader:upload %}', '#example-form');
-        });
-	</script>
 {% endblock %}
 
 {% block content %}
     <h2>Add Pictures</h2>
 	<form action="" method="post" id="example-form" enctype="multipart/form-data" >
 	    {% csrf_token %}
-	    {{ form }}
+	    {{ form.as_ul }}
 	    <button>Add</button>
 	</form>
-	</br>
-	
-	{% load image_uploader %}
-	{% cropping_preview 1 400 250 %}
-	{% cropping_preview 2 150 94 %}
+	<br>
+
+{% load image_uploader %}
+<table>
+
+    <tbody>
+        <tr>
+            <td>{% cropping_preview form.image1 100 100 %}</td>
+            <td>{% cropping_preview form.image1 200 200 %}</td>
+            <td>{% cropping_preview form.image1 300 300 %}</td>
+        </tr>
+        <tr>
+            <td>{% cropping_preview form.image2 100 50 %}</td>
+            <td>{% cropping_preview form.image2 200 100 %}</td>
+            <td>{% cropping_preview form.image2 300 150 %}</td>
+        </tr>
+    </tbody>
+</table>
+
 {% endblock %}

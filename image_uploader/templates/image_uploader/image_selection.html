@@ -1,24 +1,29 @@
 {% load i18n %}
-						{{ image_field }}
-						<div class="row-fluid">
-							<div class="span12">
-								<div class="alert alert-error" id="image-error-block" style="display: none">
-									<button class="close" data-dismiss="alert">×</button>
-									<p><strong>{% trans 'Image uploading error:' %}</strong></p>
-									<hr/>
-									<p id="image-error"></p>
-								</div>
-								<div id="crop-block" style="display: none">
-									<img id="target"/>
-									{% for coord in coord_fields %}	
-										{{ coord }}
-									{% endfor %}
-								</div>
-								<div id="loading" style="display: none;">
-									<img src="{{ STATIC_URL }}image_uploader/img/ajax-loader.gif" alt="loading"/>
-								</div>
-							</div>
-						</div>
-						<script type="text/javascript">
-							ImageUploader.setInput('{{ image_name }}', '#{{ image_id }}'{% for coord_id in coord_ids %}, '#{{ coord_id }}'{% endfor %});
-						</script>
+{{ image_field }}
+<div class="row-fluid">
+	<div class="span12">
+		<div class="alert alert-error" id="{{ input_id }}-error-block" style="display: none">
+			<button class="close" data-dismiss="alert">×</button>
+			<p><strong>{% trans 'Image uploading error:' %}</strong></p>
+			<hr/>
+			<p id="{{ input_id }}-error-text"></p>
+		</div>
+		<div id="{{ input_id }}-crop-block" {% if not value %}style="display: none;"{% endif %}>
+			<img id="{{ input_id }}-target" {% if value %} src="{{ MEDIA_URL }}{{ value }}"{% endif %}/>
+			{% for coord in coord_fields %}
+				{{ coord }}
+			{% endfor %}
+		</div>
+		<div id="{{ input_id }}-loading" style="display: none;">
+			<img src="{{ STATIC_URL }}image_uploader/img/ajax-loader.gif" alt="loading..."/>
+		</div>
+	</div>
+</div>
+<script type="text/javascript">
+	if (window.croppers == undefined){
+		window.croppers = []
+	}
+	var cropper = Cropper( '{{ input_id }}',[{{ size.0 }}, {{ size.1 }}] , {{ widget_width }}, '{% url image_uploader:upload %}' );
+	window.croppers.push(cropper)
+</script>
+

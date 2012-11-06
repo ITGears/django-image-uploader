@@ -1,43 +1,41 @@
 # -*- coding: utf-8 -*-
-from itertools import chain
-
 from django.conf import settings
+from django.contrib.admin.widgets import AdminFileWidget
 from django.forms import HiddenInput
 from django.forms.widgets import ClearableFileInput, MultiWidget
 from django.template import Context
 from django.template.loader import get_template
 
 from image_uploader.settings import IMAGE_UPLOADER_SEPARATOR
-from image_uploader.settings import IMAGE_UPLOADER_NAME
 
 
 class ImageUploader(MultiWidget):
-    class Media:
-        css = {'all': ('/static/image_uploader/css/crop/jquery.Jcrop.min.css',)}
-        js = ['/static/image_uploader/js/crop/jquery.Jcrop.min.js',
-              '/static/image_uploader/js/jquery.form.js',
-              '/static/image_uploader/js/uploading.js']
 
     separator = IMAGE_UPLOADER_SEPARATOR
-    input_name = IMAGE_UPLOADER_NAME
-    image_name = '%s_0' % input_name
+
+    class Media:
+        css = {'all': ('/static/image_uploader/css/jquery.Jcrop.min.css',)}
+        js = ['/static/image_uploader/js/crop.js',
+              '/static/image_uploader/js/jquery.Jcrop.min.js',
+              '/static/image_uploader/js/jquery.form.js']
 
     def __init__(self, attrs=None):
-        self.image_id = 'id_%s' % self.image_name
-        self.coord_id = 'id_%s' % self.input_name
-        self.coord_ids = ['%s_%s' % (self.coord_id, i) for i in range(1, 5)]
+        self.input_name = attrs.pop('input_name')
+        self.size = attrs.pop('size')
+        self.widget_width = attrs.pop('widget_width') if attrs.get('widget_width', None) else 300
+        self.value = None
 
-        widgets = (ClearableFileInput(),
+        widgets = (AdminFileWidget(),
                    HiddenInput(),
                    HiddenInput(),
                    HiddenInput(),
                    HiddenInput())
-        if not attrs:
-            attrs = {}
-        attrs.update({'id': 'id_imageuploader'})
+
         super(ImageUploader, self).__init__(widgets, attrs)
 
     def render(self, name, value, attrs=None):
+        final_attrs = self.build_attrs(attrs, name=name)
+        self.input_id = final_attrs['id'] if final_attrs and 'id' in final_attrs else ('id_' + self.input_name)
         return super(ImageUploader, self).render(self.input_name, value, attrs)
 
     def value_from_datadict(self, data, files, name):
@@ -45,15 +43,25 @@ class ImageUploader(MultiWidget):
 
     def decompress(self, value):
         if value:
-            image_name, x, y, x2, y2 = value.split(self.separator)
-            return [image_name, x, y, x2, y2]
-        return [None, None, None, None, None]
+            try:
+                image_name, x, y, x2, y2 = value.split(self.separator)
+                self.value = image_name
+                return [image_name, x, y, x2, y2]
+            except:
+                self.value = value
+                print type(value)
+                return [value, None, None, None, None]
+        else:
+            return [None, None, None, None, None]
 
     def format_output(self, rendered_widgets):
         t = get_template('image_uploader/image_selection.html')
         return t.render(Context({'STATIC_URL': settings.STATIC_URL,
-                                  'image_field': rendered_widgets[0],
-                                  'coord_fields': rendered_widgets[1:5],
-                                  'image_name': self.image_name,
-                                  'image_id': self.image_id,
-                                  'coord_ids': self.coord_ids}))
+                                 'MEDIA_URL': settings.MEDIA_URL,
+                                 'image_field': rendered_widgets[0],
+                                 'coord_fields': rendered_widgets[1:5],
+                                 'input_id': self.input_id,
+                                 'input_name': self.input_name,
+                                 'size': self.size,
+                                 'value': self.value,
+                                 'widget_width': self.widget_width}))

@@ -6,7 +6,8 @@
     <ul>
     {% for picture in object_list %}
         <li>{{ picture.author }}</li>
-        <li><img src="{{ MEDIA_URL }}{{ picture.image }}"/></li>
+        <li><img src="{{ MEDIA_URL }}{{ picture.image1 }}"/></li>
+        <li><img src="{{ MEDIA_URL }}{{ picture.image2 }}"/></li>
     {% endfor %}
     </ul>
 {% endblock %}
