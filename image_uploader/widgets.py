@@ -2,7 +2,7 @@
 from django.conf import settings
 from django.contrib.admin.widgets import AdminFileWidget
 from django.forms import HiddenInput
-from django.forms.widgets import ClearableFileInput, MultiWidget
+from django.forms.widgets import ClearableFileInput, MultiWidget, CheckboxInput, FileInput
 from django.template import Context
 from django.template.loader import get_template
 
@@ -25,11 +25,15 @@ class ImageUploader(MultiWidget):
         self.widget_width = attrs.pop('widget_width') if attrs.get('widget_width', None) else 300
         self.value = None
 
-        widgets = (AdminFileWidget(),
+        widgets = (ClearableFileInput(),
                    HiddenInput(),
                    HiddenInput(),
                    HiddenInput(),
                    HiddenInput())
+
+        widgets[0].template_with_initial = u'%(clear_template)s<br/>%(input_text)s: %(input)s'
+        widgets[0].template_with_clear = u'%(clear_checkbox_label)s: %(clear)s'
+
 
         super(ImageUploader, self).__init__(widgets, attrs)
 
@@ -61,7 +65,6 @@ class ImageUploader(MultiWidget):
                                  'image_field': rendered_widgets[0],
                                  'coord_fields': rendered_widgets[1:5],
                                  'input_id': self.input_id,
-                                 'input_name': self.input_name,
                                  'size': self.size,
                                  'value': self.value,
                                  'widget_width': self.widget_width}))

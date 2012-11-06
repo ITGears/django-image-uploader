@@ -3,7 +3,8 @@ from StringIO import StringIO
 
 from django.core.exceptions import ValidationError
 from django.core.files.uploadedfile import InMemoryUploadedFile
-from django.forms.fields import ImageField
+from django.forms.fields import FileField, ImageField
+from django.forms.widgets import FILE_INPUT_CONTRADICTION
 from django.utils.translation import ugettext_lazy as _
 
 from widgets import ImageUploader
@@ -25,10 +26,28 @@ class ImageUploaderField(ImageField):
                                            'size': self.size})
 
     def clean(self, data, initial=None):
-        if initial and all(not i for i in data):
+        print 'clean:', data, initial
+        # If the widget got contradictory inputs, we raise a validation error
+        if data[0] is FILE_INPUT_CONTRADICTION:
+            raise ValidationError(self.error_messages['contradiction'])
+
+        if not initial and all(not i for i in data):
+            return None
+
+        # False means the field value should be cleared; further validation is
+        # not needed.
+        if data[0] is False:
+            if not self.required:
+                return False
+            # If the field is required, clearing is not possible (the widget
+            # shouldn't return False data in that case anyway). False is not
+            # in validators.EMPTY_VALUES; if a False value makes it this far
+            # it should be validated from here on out as None (so it will be
+            # caught by the required check).
+            data[0] = None
+        if not data[0] and initial:
             return initial
-        else:
-            return super(ImageUploaderField, self).clean(data, initial)
+        return super(FileField, self).clean(data)
 
     def to_python(self, data):
         file_data = data[0]
