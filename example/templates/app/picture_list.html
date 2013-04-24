@@ -2,7 +2,7 @@
 
 {% block content %}
     <h2>Pictures</h2>
-    <h4><a href="{% url add %}">Add</a></h4>
+    <h4><a href="{% url 'add' %}">Add</a></h4>
     <ul>
     {% for picture in object_list %}
         <li>{{ picture.author }}</li>

@@ -23,7 +23,7 @@
 	if (window.croppers == undefined){
 		window.croppers = []
 	}
-	var cropper = Cropper( '{{ input_id }}',[{{ size.0 }}, {{ size.1 }}] , {{ widget_width }}, '{% url image_uploader:upload %}' );
+	var cropper = Cropper( '{{ input_id }}',[{{ size.0 }}, {{ size.1 }}] , {{ widget_width }}, "{% url 'image_uploader:upload' %}" );
 	window.croppers.push(cropper)
 </script>
 
